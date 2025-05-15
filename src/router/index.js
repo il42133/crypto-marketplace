@@ -5,19 +5,14 @@ import Login       from '../views/Login.vue'
 import Register    from '../views/Register.vue'
 import Dashboard   from '../views/Dashboard.vue'
 import AdminPanel  from '../views/AdminPanel.vue'
+import CoinDetail from '../views/CoinDetail.vue'
 
 const routes = [
-  { path: '/login',    component: Login },
+  { path: '/login', component: Login },
   { path: '/register', component: Register },
-  {
-    path: '/',          // now public
-    component: Dashboard
-  },
-  {
-    path: '/admin',
-    component: AdminPanel,
-    meta: { requiresAuth: true, requiresAdmin: true },
-  },
+  { path: '/', component: Dashboard },
+  { path: '/admin', component: AdminPanel, meta: { requiresAuth: true, requiresAdmin: true }, },
+  { path: '/coin/:id', name: 'coinDetail', component: CoinDetail, props: true},
 ]
 
 const router = createRouter({

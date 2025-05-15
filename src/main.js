@@ -18,7 +18,7 @@ const vuetify = createVuetify({
       customDark: {
         dark: true,
         colors: {
-          background: '#130140',  // page background
+          background: '#0f0236',  // page background
           surface:    '#21036b',  // cards, tables, etc.
           primary:    '#ffffff',  // main text & icons
           onSurface: '#ffffff',   // ensure text on surfaces is white
