@@ -1,15 +1,12 @@
 <template>
   <div class="table-wrapper">
     <v-card>
-      <!-- Header: Last updated & Refresh -->
       <v-card-title class="d-flex align-center justify-space-between">
         <div class="text-caption">
           Last updated: {{ lastUpdate ? formatDate(lastUpdate) : '—' }}
         </div>
-        <v-btn text small @click="loadData">Refresh</v-btn>
       </v-card-title>
 
-      <!-- Data Table -->
       <v-data-table
         :headers="headers"
         :items="cryptos"
@@ -18,13 +15,12 @@
         :items-per-page="cryptos.length"
         @click:row="onRowClick"
       >
-        <template #item.current_price="{ item }">
-          {{ formatPrice(item.current_price) }}
+        <template #item.price="{ item }">
+          {{ formatPrice(item.price) }}
         </template>
-
-        <template #item.price_change_percentage_24h="{ item }">
-          <span :class="item.price_change_percentage_24h >= 0 ? 'text-success' : 'text-error'">
-            {{ item.price_change_percentage_24h.toFixed(2) }}%
+        <template #item.change="{ item }">
+          <span :class="item.change >= 0 ? 'text-success' : 'text-error'">
+            {{ item.change.toFixed(2) }}%
           </span>
         </template>
       </v-data-table>
@@ -33,89 +29,71 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { collection, onSnapshot } from 'firebase/firestore'
+import { db } from '../firebase.js'
 
+// Router for navigation to detail page
 const router = useRouter()
-
-// Table headers
-const headers = [
-  { title: 'Currency', key: 'name', align: 'center' },
-  { title: 'Symbol', key: 'symbol', align: 'center' },
-  { title: 'Price (USD)', key: 'current_price', align: 'center' },
-  { title: '24h Change', key: 'price_change_percentage_24h', align: 'center' },
-]
-
-// Static top-50 coin IDs
-const frozenIds = [
-  'bitcoin','ethereum','tether','binancecoin','solana','usd-coin','ripple','staked-ether',
-  'dogecoin','cardano','avalanche-2','tron','shiba-inu','polkadot','wrapped-bitcoin',
-  'chainlink','polygon','toncoin','bitcoin-cash','internet-computer','litecoin','uniswap',
-  'dai','leo-token','ethereum-classic','aptos','stellar','arbitrum','render-token','near',
-  'okb','vechain','mantle','filecoin','monero','injective-protocol','cosmos','hedera-hashgraph',
-  'maker','dogwifhat','kaspa','sui','the-graph','quant-network','fetch-ai','theta-token',
-  'bitget-token','eos','algorand','elrond-erd-2'
-]
 
 // Reactive state
 const cryptos = ref([])
 const lastUpdate = ref(null)
-let intervalId = null
 
-// Format timestamp for display
+// Table headers
+const headers = [
+  { title: 'Currency',    key: 'name',   align: 'center' },
+  { title: 'Symbol',      key: 'symbol', align: 'center' },
+  { title: 'Price (USD)', key: 'price',  align: 'center' },
+  { title: '24h Change',  key: 'change', align: 'center' },
+]
+
+// Subscribe to Firestore collection 'coinPrices'
+const unsubscribe = onSnapshot(
+  collection(db, 'coinPrices'),
+  (snapshot) => {
+    cryptos.value = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id:     doc.id,
+        name:   data.name,
+        symbol: data.symbol,
+        price:  data.price,
+        change: data.change || 0,
+      }
+    })
+    lastUpdate.value = new Date()
+  },
+  (error) => {
+    console.error('Firestore error:', error)
+  }
+)
+
+// Clean up listener on unmount
+onUnmounted(() => {
+  unsubscribe()
+})
+
+// Navigate to dynamic coin detail
+function onRowClick(event, row) {
+  const coin = row.item
+  router.push({ name: 'coinDetail', params: { id: coin.id } })
+}
+
+// Format helpers
 function formatDate(date) {
-  return new Date(date).toLocaleString(undefined, {
+  return date.toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   })
 }
-
-// Format price as USD currency
-function formatPrice(num) {
-  return `$${num.toLocaleString(undefined, {
+function formatPrice(value) {
+  return `$${value.toLocaleString(undefined, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`
 }
-
-// Fetch market data for frozen IDs
-async function loadData() {
-  try {
-    const res = await axios.get(
-      'https://api.coingecko.com/api/v3/coins/markets',
-      { params: { vs_currency: 'usd', ids: frozenIds.join(',') } }
-    )
-    cryptos.value = res.data.map(c => ({
-      id:      c.id,
-      name:    c.name,
-      symbol:  c.symbol.toUpperCase(),
-      current_price: c.current_price,
-      price_change_percentage_24h: c.price_change_percentage_24h,
-    }))
-    lastUpdate.value = new Date()
-  } catch (e) {
-    console.error('Error fetching market data:', e)
-  }
-}
-
-// Navigate to detail page on row click
-function onRowClick(event, row) {
-  // row.item is your coin object
-  const coin = row.item
-  console.log('clicked on', coin.id)      // sanity check
-  router.push({ name: 'coinDetail', params: { id: coin.id } })
-}
-
-// Auto-refresh logic
-onMounted(() => {
-  loadData()
-  intervalId = setInterval(loadData, 60000)
-})
-
-onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId)
-})
 </script>
 
 <style scoped>
@@ -129,8 +107,6 @@ onUnmounted(() => {
     max-width: 50vw;
   }
 }
-
-/* Center headers */
 :deep(.v-data-table thead th) {
   text-align: center;
 }
