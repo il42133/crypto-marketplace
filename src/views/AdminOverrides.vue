@@ -1,9 +1,20 @@
 <template>
   <v-container>
-    <!-- Home Button -->
-    <v-btn text @click="goHome" class="mb-4">
-      Home
-    </v-btn>
+    <!-- Navigation Buttons -->
+    <div class="d-flex align-center justify-space-between mb-4">
+      <!-- Home on left -->
+      <div>
+        <v-btn text @click="goHome">
+          Home
+        </v-btn>
+      </div>
+      <!-- Logs on right -->
+      <div>
+        <v-btn text @click="goLogs">
+          Logs
+        </v-btn>
+      </div>
+    </div>
     <h1>Admin Price Overrides</h1>
     <v-data-table
       :headers="headers"
@@ -91,6 +102,11 @@ onUnmounted(() => {
 // Navigate back to dashboard
 function goHome() {
   router.push({ path: '/' })
+}
+
+// Navigate to Admin Logs
+function goLogs() {
+  router.push({ path: '/admin/logs' })
 }
 
 // Save override; include adminEmail and clear input
