@@ -191,4 +191,9 @@ function goHome() {
   width: 100%;
   height: 800px;
 }
+@media(max-width: 600px) {
+  .chart-container {
+    height: 300px;
+  }
+}
 </style>

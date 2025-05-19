@@ -1,8 +1,8 @@
 <template>
   <div class="table-wrapper">
     <v-card>
-      <v-card-title class="d-flex align-center justify-space-between">
-        <div class="text-caption">
+      <v-card-title class="d-flex flex-column flex-sm-row align-center justify-space-between">
+        <div class="text-caption mb-2 mb-sm-0">
           Last updated: {{ lastUpdate ? formatDate(lastUpdate) : '—' }}
         </div>
         <!-- Show button only for admins -->
@@ -129,12 +129,9 @@ function formatPrice(value) {
   width: 100%;
   max-width: 95vw;
   margin: 0 auto;
+  padding: 4px;
 }
-@media (min-width: 600px) {
-  .table-wrapper {
-    max-width: 50vw;
-  }
-}
+
 :deep(.v-data-table thead th) {
   text-align: center;
 }

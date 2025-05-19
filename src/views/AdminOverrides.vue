@@ -87,10 +87,9 @@ onMounted(() => {
   unsubscribeFn = onSnapshot(priceQuery, snapshot => {
     coins.value = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     // Initialize override inputs
+    overrideMap.value = {}
     coins.value.forEach(c => {
-      if (!(c.id in overrideMap.value)) {
-        overrideMap.value[c.id] = c.source === 'admin' ? c.price : ''
-      }
+      overrideMap.value[c.id] = ''
     })
   })
 })
