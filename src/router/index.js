@@ -4,14 +4,16 @@ import { useAuthStore } from '../stores/auth.js'
 import Login       from '../views/Login.vue'
 import Register    from '../views/Register.vue'
 import Dashboard   from '../views/Dashboard.vue'
-import AdminPanel  from '../views/AdminPanel.vue'
+import AdminOverrides from '../views/AdminOverrides.vue'
 import CoinDetail from '../views/CoinDetail.vue'
+import AdminLogs from '../views/AdminLogs.vue'
 
 const routes = [
   { path: '/login', component: Login },
   { path: '/register', component: Register },
   { path: '/', component: Dashboard },
-  { path: '/admin', component: AdminPanel, meta: { requiresAuth: true, requiresAdmin: true }, },
+  { path: '/admin', name: 'AdminOverrides', component: AdminOverrides, meta: { requiresAuth: true, requiresAdmin: true }, },
+  { path: '/admin/logs', name: 'AdminLogs', component: AdminLogs, meta: { requiresAuth: true, requiresAdmin: true }, },
   { path: '/coin/:id', name: 'coinDetail', component: CoinDetail, props: true},
 ]
 
@@ -22,7 +24,6 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
-  // wait for Firebase to finish initializing
   if (!authStore.ready) {
     await new Promise((r) => {
       const unwatch = authStore.$subscribe(() => {

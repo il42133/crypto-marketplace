@@ -1,6 +1,9 @@
 <template>
   <v-container class="pa-4">
-    <v-btn text @click="$router.back()">← Back</v-btn>
+    <!-- Home Button -->
+    <v-btn text @click="goHome" class="mb-4">
+      Home
+    </v-btn>
 
     <h2 class="text-h6 mt-4 mb-4">{{ displayName }}</h2>
 
@@ -25,7 +28,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import Chart from 'chart.js/auto'
 import zoomPlugin from 'chartjs-plugin-zoom'
@@ -35,6 +38,7 @@ import 'chartjs-adapter-date-fns'
 Chart.register(zoomPlugin)
 
 const route = useRoute()
+const router = useRouter()
 const coinId = route.params.id
 
 // Display name and readiness
@@ -73,31 +77,26 @@ function buildData(prices) {
 
 // Fetch all required data in parallel
 async function fetchAllData() {
-  // Fetch coin info
   const infoRes = await axios.get(
     `https://api.coingecko.com/api/v3/coins/${coinId}`
   )
   displayName.value = infoRes.data.name
 
-  // Current timestamp
-  const now = Math.floor(Date.now() / 1000)
+  const [r24h, r7d, r30d] = await Promise.all([
+    axios.get(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
+      { params: { vs_currency: 'usd', days: 1 } }
+    ),
+    axios.get(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
+      { params: { vs_currency: 'usd', days: 7 } }
+    ),
+    axios.get(
+      `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
+      { params: { vs_currency: 'usd', days: 30 } }
+    )
+  ])
 
-  // Parallel fetches for each timeframe
-  const p24h = axios.get(
-    `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
-    { params: { vs_currency: 'usd', days: 1 } }
-  )
-  const p7d  = axios.get(
-    `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
-    { params: { vs_currency: 'usd', days: 7 } }
-  )
-  const p30d = axios.get(
-    `https://api.coingecko.com/api/v3/coins/${coinId}/market_chart`,
-    { params: { vs_currency: 'usd', days: 30 } }
-  )
-
-  // Await all
-  const [r24h, r7d, r30d] = await Promise.all([p24h, p7d, p30d])
   chartDataSets['24h'] = buildData(r24h.data.prices)
   chartDataSets['7d']  = buildData(r7d.data.prices)
   chartDataSets['30d'] = buildData(r30d.data.prices)
@@ -131,24 +130,23 @@ function renderChart() {
             time: { unit },
             min: minTime,
             max: maxTime,
+            ticks: {
+              autoSkip: true,
+              maxTicksLimit: maxTicks,
+              color: '#ffffff',
+            },
             grid: { display: false },
-            ticks: { color: '#ffffff', autoSkip: true, maxTicksLimit: maxTicks },
-            border: { color: '#cccccc', width: 1 },
           },
           y: {
             beginAtZero: false,
             grid: { color: 'rgba(200,200,200,0.5)', lineWidth: 1 },
             ticks: { color: '#ffffff' },
-            border: { color: '#cccccc', width: 1 },
           }
         },
         plugins: {
           title: { display: true, text: title, color: '#fff' },
-          legend: { labels: { color: '#fff' } },
           zoom: {
-            limits: {
-              x: { min: minTime, max: maxTime }
-            },
+            limits: { x: { min: minTime, max: maxTime } },
             pan: { enabled: true, mode: 'x' },
             zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'x' }
           }
@@ -156,14 +154,15 @@ function renderChart() {
       }
     })
   } else {
-    chartInstance.data = data
     chartInstance.options.scales.x.time.unit = unit
     chartInstance.options.scales.x.min = minTime
     chartInstance.options.scales.x.max = maxTime
     chartInstance.options.scales.x.ticks.maxTicksLimit = maxTicks
     chartInstance.options.plugins.title.text = title
-    // Update pan/zoom limits
+    // update zoom limits on each timeframe switch
     chartInstance.options.plugins.zoom.limits = { x: { min: minTime, max: maxTime } }
+    // update data and redraw
+    chartInstance.data = data
     chartInstance.update()
   }
   chartReady.value = true
@@ -179,6 +178,11 @@ onMounted(async () => {
 onUnmounted(() => {
   if (chartInstance) chartInstance.destroy()
 })
+
+// Navigate home
+function goHome() {
+  router.push({ path: '/' })
+}
 </script>
 
 <style scoped>
