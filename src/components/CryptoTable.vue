@@ -2,26 +2,39 @@
   <div class="table-wrapper">
     <v-card>
       <v-card-title class="d-flex flex-column flex-sm-row align-center justify-space-between">
+        <!-- Left side: Last updated text -->
         <div class="text-caption mb-2 mb-sm-0">
           Last updated: {{ lastUpdate ? formatDate(lastUpdate) : '—' }}
         </div>
-        <!-- Show button only for admins -->
-        <v-btn
-          v-if="authStore.isAdmin"
-          color="primary"
-          @click="goToOverrides"
-          small
-        >
-          Admin Overrides
-        </v-btn>
+
+        <!-- Right side: bigger search + smaller override button -->
+        <div class="d-flex align-center">
+          <v-text-field
+            v-model="searchTerm"
+            placeholder="Search…"
+            dense
+            hide-details
+            append-inner-icon="mdi-magnify"
+            class="mr-4"
+            style="max-width: 300px"
+          />
+          <v-btn
+            v-if="authStore.isAdmin"
+            color="primary"
+            @click="goToOverrides"
+            x-small
+          >
+            Override
+          </v-btn>
+        </div>
       </v-card-title>
 
       <v-data-table
         :headers="headers"
-        :items="cryptos"
+        :items="filteredCryptos"
         class="elevation-1"
         hide-default-footer
-        :items-per-page="cryptos.length"
+        :items-per-page="filteredCryptos.length"
         @click:row="onRowClick"
       >
         <template #item.price="{ item }">
@@ -34,23 +47,80 @@
         </template>
       </v-data-table>
     </v-card>
+
+    <v-bottom-navigation
+    v-model="activeTab"
+    color="primary"
+    grow
+    style="position: fixed; bottom: 0; left: 0; right: 0;"
+  >
+    <v-btn
+      value="home"
+      @click="() => router.push({ path: '/' })"
+    >
+      <v-icon size="20">mdi-home</v-icon>
+      Home
+    </v-btn>
+
+    <v-btn
+      value="markets"
+      @click="() => router.push({ path: '/' })"
+    >
+      <v-icon size="20">mdi-chart-line</v-icon>
+      Markets
+    </v-btn>
+
+    <v-btn
+      value="trade"
+      @click="() => router.push({ name: 'Trade' })"
+    >
+      <v-icon size="20">mdi-swap-horizontal</v-icon>
+      Trade
+    </v-btn>
+
+    <v-btn
+      value="pledge"
+      @click="() => router.push({ name: 'PledgeMining' })"
+    >
+      <v-icon size="20">mdi-pickaxe</v-icon>
+      Pledge
+    </v-btn>
+
+    <v-btn
+      value="assets"
+      @click="() => router.push({ name: 'Assets' })"
+    >
+      <v-icon size="20">mdi-wallet</v-icon>
+      Assets
+    </v-btn>
+  </v-bottom-navigation>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth.js'
 import { collection, query, orderBy, onSnapshot } from 'firebase/firestore'
 import { db } from '../firebase.js'
-import { useAuthStore } from '../stores/auth.js'
 
-// Router & Auth store
+// Router & Auth
 const router = useRouter()
+const activeTab = ref('markets')
 const authStore = useAuthStore()
 
-// Reactive state
-const cryptos = ref([])
+// State
+const cryptos    = ref([])
 const lastUpdate = ref(null)
+const searchTerm = ref('')
+
+// Filtered items
+const filteredCryptos = computed(() =>
+  cryptos.value.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
+    c.symbol.toLowerCase().includes(searchTerm.value.toLowerCase())
+  )
+)
 
 // Table headers
 const headers = [
@@ -60,56 +130,44 @@ const headers = [
   { title: '24h Change',  key: 'change', align: 'center' },
 ]
 
-// Subscribe to Firestore sorted by price on mount
+// Firestore listener
 let unsubscribeFn = null
 onMounted(() => {
   const priceQuery = query(
     collection(db, 'coinPrices'),
     orderBy('price', 'desc')
   )
-  unsubscribeFn = onSnapshot(
-    priceQuery,
-    (snapshot) => {
-      // Map document data
-      cryptos.value = snapshot.docs.map(doc => {
-        const data = doc.data()
-        return {
-          id:     doc.id,
-          name:   data.name,
-          symbol: data.symbol,
-          price:  data.price,
-          change: data.change || 0,
-        }
-      })
-      // Compute lastUpdate from Firestore timestamps
-      const fetchedDates = snapshot.docs
-        .map(doc => doc.data().lastFetched)
-        .filter(ts => ts)
-        .map(ts => ts.toDate().getTime())
-      lastUpdate.value = fetchedDates.length
-        ? new Date(Math.max(...fetchedDates))
-        : null
-    },
-    (error) => {
-      console.error('Firestore error:', error)
-    }
-  )
+  unsubscribeFn = onSnapshot(priceQuery, snap => {
+    cryptos.value = snap.docs.map(d => {
+      const data = d.data()
+      return {
+        id:     d.id,
+        name:   data.name,
+        symbol: data.symbol,
+        price:  data.price,
+        change: data.change || 0,
+      }
+    })
+    const times = snap.docs
+      .map(d => d.data().lastFetched)
+      .filter(ts => ts)
+      .map(ts => ts.toDate().getTime())
+    lastUpdate.value = times.length
+      ? new Date(Math.max(...times))
+      : null
+  })
 })
+onUnmounted(() => unsubscribeFn && unsubscribeFn())
 
-// Cleanup on unmount
-onUnmounted(() => {
-  if (unsubscribeFn) unsubscribeFn()
-})
-
-// Navigation handlers
-function onRowClick(event, row) {
-  router.push({ name: 'coinDetail', params: { id: row.item.id } })
+// Navigation
+function onRowClick(_, { item }) {
+  router.push({ name: 'coinDetail', params: { id: item.id } })
 }
 function goToOverrides() {
   router.push({ name: 'AdminOverrides' })
 }
 
-// Format helpers
+// Helpers
 function formatDate(date) {
   return date.toLocaleString(undefined, {
     dateStyle: 'medium',
@@ -131,7 +189,6 @@ function formatPrice(value) {
   margin: 0 auto;
   padding: 4px;
 }
-
 :deep(.v-data-table thead th) {
   text-align: center;
 }

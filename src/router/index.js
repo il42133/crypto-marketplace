@@ -1,20 +1,54 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '../stores/auth.js'
+// src/router/index.js
 
-import Login       from '../views/Login.vue'
-import Register    from '../views/Register.vue'
-import Dashboard   from '../views/Dashboard.vue'
-import AdminOverrides from '../views/AdminOverrides.vue'
-import CoinDetail from '../views/CoinDetail.vue'
-import AdminLogs from '../views/AdminLogs.vue'
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore }           from '../stores/auth.js'
+
+import Login            from '../views/Login.vue'
+import Register         from '../views/Register.vue'
+import LandingPage      from '../views/LandingPage.vue'    // ← new
+import Dashboard        from '../views/Dashboard.vue'      // your CryptoTable
+import AdminOverrides   from '../views/AdminOverrides.vue'
+import AdminLogs        from '../views/AdminLogs.vue'
+import CoinDetail       from '../views/CoinDetail.vue'
+import PrimaryVerification from '../views/PrimaryVerification.vue'
 
 const routes = [
-  { path: '/login', component: Login },
+  { path: '/login',    component: Login },
   { path: '/register', component: Register },
-  { path: '/', component: Dashboard },
-  { path: '/admin', name: 'AdminOverrides', component: AdminOverrides, meta: { requiresAuth: true, requiresAdmin: true }, },
-  { path: '/admin/logs', name: 'AdminLogs', component: AdminLogs, meta: { requiresAuth: true, requiresAdmin: true }, },
-  { path: '/coin/:id', name: 'coinDetail', component: CoinDetail, props: true},
+
+  // Landing is now your home page
+  { path: '/', name: 'Landing', component: LandingPage },
+
+  // Markets lives under /markets
+  { path: '/markets', name: 'Dashboard', component: Dashboard },
+
+  // Admin
+  {
+    path: '/admin',
+    name: 'AdminOverrides',
+    component: AdminOverrides,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+  {
+    path: '/admin/logs',
+    name: 'AdminLogs',
+    component: AdminLogs,
+    meta: { requiresAuth: true, requiresAdmin: true },
+  },
+
+  {
+    path: '/primary-verfication',
+    name: 'PrimaryVerification',
+    component: PrimaryVerification,
+    meta: { requiresAuth: true, requiresAdmin: false },
+  },
+
+  {
+    path: '/coin/:id',
+    name: 'coinDetail',
+    component: CoinDetail,
+    props: true
+  },
 ]
 
 const router = createRouter({
@@ -24,24 +58,27 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const authStore = useAuthStore()
+
+  // wait for Firebase init
   if (!authStore.ready) {
-    await new Promise((r) => {
+    await new Promise(r => {
       const unwatch = authStore.$subscribe(() => {
         if (authStore.ready) { unwatch(); r() }
       })
     })
   }
+
   const user = authStore.user
 
-  // Protect admin pages
+  // protect admin pages
   if (to.meta.requiresAuth && !user) {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
-    return { path: '/' }
+    return { path: '/' }   // goes back to Landing
   }
 
-  // Redirect logged-in users away from login/register
+  // redirect signed-in users away from login/register
   if ((to.path === '/login' || to.path === '/register') && user) {
     return { path: '/' }
   }
