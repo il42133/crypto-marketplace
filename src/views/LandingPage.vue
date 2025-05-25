@@ -32,6 +32,7 @@
             v-for="(item, i) in menuItems"
             :key="i"
             link
+            @click="() => { drawer=false; if(item.route) router.push(item.route) }"
           >
             <template #prepend>
               <v-icon>{{ item.icon }}</v-icon>
@@ -311,10 +312,10 @@ const activeTab2 = ref('table')    // market tabs
 const menuItems = [
   { title: 'Primary Verification', icon: 'mdi-shield-check', route: '/primary-verification' },
   { title: 'Identify Verification', icon: 'mdi-card-account-details' },
-  { title: 'Set Fund password', icon: 'mdi-lock-reset' },
-  { title: 'Set login password', icon: 'mdi-lock' },
+  { title: 'Set Fund password', icon: 'mdi-lock-reset', route: '/set-fund-password' },
+  { title: 'Set login password', icon: 'mdi-lock', route: '/set-login-password' },
   { title: 'sidebar_bind_address', icon: 'mdi-map-marker-radius' },
-  { title: 'sidebar_plug', icon: 'mdi-flash' },
+  { title: 'sidebar_plug', icon: 'mdi-flash', route: '/promotion' },
   { title: 'Email Authentication', icon: 'mdi-email' },
   { title: 'Terms of Service', icon: 'mdi-file-document-outline' },
   { title: 'Help Center', icon: 'mdi-help-circle-outline' },

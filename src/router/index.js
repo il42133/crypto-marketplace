@@ -11,6 +11,10 @@ import AdminOverrides   from '../views/AdminOverrides.vue'
 import AdminLogs        from '../views/AdminLogs.vue'
 import CoinDetail       from '../views/CoinDetail.vue'
 import PrimaryVerification from '../views/PrimaryVerification.vue'
+import SetFundPassword from '../views/SetFundPassword.vue'
+import SetLoginPassword from '../views/SetLoginPassword.vue'
+import { tr } from 'vuetify/locale'
+import PromotionCenter from '../views/PromotionCenter.vue'
 
 const routes = [
   { path: '/login',    component: Login },
@@ -37,9 +41,30 @@ const routes = [
   },
 
   {
-    path: '/primary-verfication',
+    path: '/primary-verification',
     name: 'PrimaryVerification',
     component: PrimaryVerification,
+    meta: { requiresAuth: true, requiresAdmin: false },
+  },
+
+  {
+    path: '/set-fund-password',
+    name: 'SetFundPassword',
+    component: SetFundPassword,
+    meta: { requiresAuth: true, requiresAdmin: false },
+  },
+
+  {
+    path: '/set-login-password',
+    name: 'SetLoginPassword',
+    component: SetLoginPassword,
+    meta: { requiresAuth: true, requiresAdmin: false },
+  },
+
+  {
+    path: '/promotion',
+    name: 'PromotionCenter',
+    component: PromotionCenter,
     meta: { requiresAuth: true, requiresAdmin: false },
   },
 
