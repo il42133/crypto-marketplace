@@ -13,8 +13,23 @@ import CoinDetail       from '../views/CoinDetail.vue'
 import PrimaryVerification from '../views/PrimaryVerification.vue'
 import SetFundPassword from '../views/SetFundPassword.vue'
 import SetLoginPassword from '../views/SetLoginPassword.vue'
-import { tr } from 'vuetify/locale'
 import PromotionCenter from '../views/PromotionCenter.vue'
+import EmailAuthentication from '../views/EmailAuthentication.vue'
+import Convert from '../views/convert.vue'
+import Financing from '../views/Financing.vue'
+import FinancingDetails from '../views/FinancingDetails.vue'
+import OrdinaryProducts from '../views/OrdinaryProducts.vue'
+import MyInvestments from '../views/MyInvestments.vue'
+import Loans from '../views/Loans.vue'
+import Deposit from '../views/Deposit.vue'
+import DepositDetail from '../views/DepositDetail.vue'
+import DepositHistory from '../views/DepositHistory.vue'
+import Withdrawal from '../views/Withdrawal.vue'
+import WithdrawalHistory from '../views/WithdrawalHistory.vue'
+import WithdrawalDetail from '../views/WithdrawalDetail.vue'
+import Assets from '../views/Assets.vue'
+import Pledge from '../views/Pledge.vue'
+import PledgeRecords from '../views/PledgeRecords.vue'
 
 const routes = [
   { path: '/login',    component: Login },
@@ -69,10 +84,124 @@ const routes = [
   },
 
   {
+    path: '/email-authentication',
+    name: 'EmailAuthentication',
+    component: EmailAuthentication,
+    meta: { requiresAuth: true }
+  },
+
+  {
+    path: '/convert',
+    name: 'Convert',
+    component: Convert,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/financing',
+    name: 'Financing',
+    component: Financing,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/financing/details/:id',
+    name: 'FinancingDetails',
+    component: FinancingDetails,
+    meta: { requiresAuth: true, requiresAdmin: false },
+    props: true
+  },
+
+  {
+    path: '/products',
+    name: 'OrdinaryProducts',
+    component: OrdinaryProducts,
+    meta: { requiresAuth: true, requiresAdmin: false},
+    props: true
+  },
+
+  {
+    path: '/investments',
+    name: 'MyInvestments',
+    component: MyInvestments,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/loans',
+    name: 'Loans',
+    component: Loans,
+    meta: {requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/deposit',
+    name: 'Deposit',
+    component: Deposit,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/deposit/:asset',
+    name: 'DepositDetail',
+    component: DepositDetail,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/deposit/history',
+    name: 'DepositHistory',
+    component: DepositHistory,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/withdrawal',
+    name: 'Withdrawal',
+    component: Withdrawal,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/withdrawal/:asset',
+    name: 'WithdrawalDetail',
+    component: WithdrawalDetail,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/withdrawal/history',
+    name: 'WithdrawalHistory',
+    component: WithdrawalHistory,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
     path: '/coin/:id',
     name: 'coinDetail',
     component: CoinDetail,
     props: true
+  },
+
+  {
+    path: '/assets',
+    name: 'Assets',
+    component: Assets,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/pledge',
+    name: 'Pledge',
+    component: Pledge,
+    meta: { requiresAuth: true, requiresAdmin: false }
+  },
+
+  {
+    path: '/pledge/records',
+    name: 'PledgeRecords',
+    component: PledgeRecords,
+    meta: { requiresAuth: true, requiresAdmin: false }
   },
 ]
 

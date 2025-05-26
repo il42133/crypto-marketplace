@@ -64,7 +64,7 @@
 
     <v-btn
       value="markets"
-      @click="() => router.push({ path: '/' })"
+      @click="() => router.push({ path: '/markets' })"
     >
       <v-icon size="20">mdi-chart-line</v-icon>
       Markets
@@ -72,7 +72,7 @@
 
     <v-btn
       value="trade"
-      @click="() => router.push({ name: 'Trade' })"
+      @click="() => router.push({ name: 'coinDetail', params: { id: 'bitcoin' } })"
     >
       <v-icon size="20">mdi-swap-horizontal</v-icon>
       Trade
@@ -80,7 +80,7 @@
 
     <v-btn
       value="pledge"
-      @click="() => router.push({ name: 'PledgeMining' })"
+      @click="() => router.push({ path: '/pledge' })"
     >
       <v-icon size="20">mdi-pickaxe</v-icon>
       Pledge

@@ -98,25 +98,25 @@
       <!-- Feature shortcuts -->
       <v-row class="mx-4" justify="space-around">
         <v-col cols="3" class="text-center">
-          <v-btn icon large color="secondary">
+          <v-btn icon large color="secondary" @click="router.push({ name: 'Convert' })">
             <v-icon size="36">mdi-swap-horizontal</v-icon>
           </v-btn>
           <div class="caption mt-1">Convert</div>
         </v-col>
         <v-col cols="3" class="text-center">
-          <v-btn icon large color="secondary">
+          <v-btn icon large color="secondary" @click="goToBitcoinDetail">
             <v-icon size="36">mdi-file-document-outline</v-icon>
           </v-btn>
           <div class="caption mt-1">Smart Contract</div>
         </v-col>
         <v-col cols="3" class="text-center">
-          <v-btn icon large color="secondary">
+          <v-btn icon large color="secondary" @click="goToFinancing">
             <v-icon size="36">mdi-piggy-bank-outline</v-icon>
           </v-btn>
           <div class="caption mt-1">Financing</div>
         </v-col>
         <v-col cols="3" class="text-center">
-          <v-btn icon large color="secondary">
+          <v-btn icon large color="secondary" @click="router.push({ name: 'Loans' })">
             <v-icon size="36">mdi-bank-outline</v-icon>
           </v-btn>
           <div class="caption mt-1">Loan</div>
@@ -126,7 +126,7 @@
       <!-- Deposit / Withdrawal -->
       <v-row class="mx-4 mb-20" justify="space-around">
         <v-col cols="6">
-          <v-card elevation="2" class="pa-4 d-flex align-center justify-space-between">
+          <v-card elevation="2" class="pa-4 d-flex align-center justify-space-between" clickable @click="router.push({ name: 'Deposit' })">
             <div class="d-flex align-center">
               <v-icon size="36">mdi-rocket-launch</v-icon>
               <span class="ml-4 subtitle-2">Deposit</span>
@@ -135,7 +135,7 @@
           </v-card>
         </v-col>
         <v-col cols="6">
-          <v-card elevation="2" class="pa-4 d-flex align-center justify-space-between">
+          <v-card elevation="2" class="pa-4 d-flex align-center justify-space-between" clickable @click="router.push({ name: 'Withdrawal' })">
             <div class="d-flex align-center">
               <v-icon size="36">mdi-cash-multiple</v-icon>
               <span class="ml-4 subtitle-2">Withdrawal</span>
@@ -269,15 +269,15 @@
         <v-icon size="20">mdi-chart-line</v-icon>
         Markets
       </v-btn>
-      <v-btn value="trade" @click="() => router.push({ name: 'Trade' })">
+      <v-btn value="trade" @click="() => router.push({ name: 'coinDetail', params: { id: 'bitcoin' } })">
         <v-icon size="20">mdi-swap-horizontal</v-icon>
         Trade
       </v-btn>
-      <v-btn value="pledge" @click="() => router.push({ name: 'PledgeMining' })">
+      <v-btn value="pledge" @click="() => router.push({ name: 'Pledge' })">
         <v-icon size="20">mdi-pickaxe</v-icon>
         Pledge
       </v-btn>
-      <v-btn value="assets" @click="() => router.push({ name: 'Assets' })">
+      <v-btn value="assets" @click="() => router.push({ path: '/assets' })">
         <v-icon size="20">mdi-wallet</v-icon>
         Assets
       </v-btn>
@@ -316,7 +316,7 @@ const menuItems = [
   { title: 'Set login password', icon: 'mdi-lock', route: '/set-login-password' },
   { title: 'sidebar_bind_address', icon: 'mdi-map-marker-radius' },
   { title: 'sidebar_plug', icon: 'mdi-flash', route: '/promotion' },
-  { title: 'Email Authentication', icon: 'mdi-email' },
+  { title: 'Email Authentication', icon: 'mdi-email', route: '/email-authentication' },
   { title: 'Terms of Service', icon: 'mdi-file-document-outline' },
   { title: 'Help Center', icon: 'mdi-help-circle-outline' },
   { title: 'English', icon: 'mdi-translate' },
@@ -395,6 +395,14 @@ function formatPrice(v) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   })}`
+}
+
+function goToBitcoinDetail() {
+  router.push({ name:'coinDetail', params: { id: 'bitcoin' }})
+}
+
+function goToFinancing() {
+  router.push({ name: 'Financing' })
 }
 </script>
 
