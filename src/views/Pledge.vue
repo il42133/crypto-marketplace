@@ -40,7 +40,7 @@
     <v-row justify="center" class="mt-6">
       <v-col cols="12" md="6">
         <v-img
-          src="../src/assets/mining.png"
+          :src="mining"
           alt="Pledge Mining"
           contain
           height="240"
@@ -142,6 +142,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import mining from '../assets/mining.png'
 
 // Dialog state
 const dialog = ref(false)

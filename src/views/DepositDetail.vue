@@ -12,7 +12,7 @@
       <v-row justify="center" class="my-4">
         <v-col cols="10">
           <v-img
-            src="../src/assets/qr.png"
+            :src="qrImg"
             alt="QR Code"
             contain
             height="200"
@@ -69,6 +69,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import qrImg from '../assets/qr.png'
 
 // Simulated asset info map
 const assetMap = {
